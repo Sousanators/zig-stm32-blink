@@ -1,13 +1,17 @@
+// const resetHandler = @import("startup.zig").resetHandler;
+
+const Vector align(8) = *const fn () callconv(.C) void;
+
 // These two are the default empty implementations for exception handlers
-export fn blockingHandler() void {
+export fn blockingHandler() callconv(.C) void {
     while (true) {}
 }
 
-export fn nullHandler() void {}
+export fn nullHandler() callconv(.C) void {}
 
 // This comes from the linker script and represents the initial stack pointer address.
 // Not a function, but pretend it is to suppress type error
-extern fn _stack() void;
+extern fn _stack() callconv(.C) void;
 
 // These are the exception handlers, which are weakly linked to the default handlers
 // in the linker script
@@ -23,7 +27,7 @@ extern fn pendSVHandler() void;
 extern fn sysTickHandler() void;
 
 // The vector table
-export const vector_table linksection(".vectors") = [_]?fn () callconv(.C) void{
+export const vector_table linksection(".vectors") = [_]?Vector{
     _stack,
     resetHandler, // Reset
     nmiHandler, // NMI

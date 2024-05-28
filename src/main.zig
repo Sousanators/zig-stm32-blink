@@ -14,7 +14,7 @@ pub fn main() void {
 
     while (true) {
         // Read the LED state
-        var leds_state = regs.GPIOD.ODR.read();
+        const leds_state = regs.GPIOD.ODR.read();
         // Set the LED output to the negation of the currrent output
         regs.GPIOD.ODR.modify(.{
             .ODR12 = ~leds_state.ODR12,

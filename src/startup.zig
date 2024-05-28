@@ -1,4 +1,4 @@
-const main = @import("main.zig");
+const main = @import("main.zig").main;
 
 // These symbols come from the linker script
 extern const _data_loadaddr: u32;
@@ -7,20 +7,28 @@ extern const _edata: u32;
 extern var _bss: u32;
 extern const _ebss: u32;
 
-export fn resetHandler() void {
+export fn resetHandler() callconv(.C) void {
     // Copy data from flash to RAM
-    const data_loadaddr = @ptrCast([*]const u8, &_data_loadaddr);
-    const data = @ptrCast([*]u8, &_data);
-    const data_size = @ptrToInt(&_edata) - @ptrToInt(&_data);
-    for (data_loadaddr[0..data_size]) |d, i| data[i] = d;
+    const data_loadaddr: [*]const u8 = @ptrCast(&_data_loadaddr);
+    const data: [*]u8 = @ptrCast(&_data);
+    const data_size = @intFromPtr(&_edata) - @intFromPtr(&_data);
+    const values = data_loadaddr[0..data_size];
+    @memcpy(data, values);
+    // for (values, 0..) |v, i| {
+    //     data[i] = v;
+    // }
 
     // Clear the bss
-    const bss = @ptrCast([*]u8, &_bss);
-    const bss_size = @ptrToInt(&_ebss) - @ptrToInt(&_bss);
-    for (bss[0..bss_size]) |*b| b.* = 0;
+    const bss: [*]u8 = @ptrCast(&_bss);
+    const bss_size = @intFromPtr(&_ebss) - @intFromPtr(&_bss);
+    const bss_region = bss[0..bss_size];
+    @memset(bss_region, 0);
+    // for (bss_region) |*b| {
+    //     b.* = 0;
+    // }
 
     // Call contained in main.zig
-    main.main();
+    main();
 
     unreachable;
 }

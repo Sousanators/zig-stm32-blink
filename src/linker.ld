@@ -30,11 +30,8 @@ MEMORY
   ccm (rwx) : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-/* Enforce emmition of the vector table. */
-EXTERN (vector_table)
-
 /* Define the entry point of the output file. */
-ENTRY(resetHandler)
+/* ENTRY(resetHandler) */
 
 /* This provide weak linking to empty handlers, which can be overridden */
 PROVIDE(nmiHandler = nullHandler);
@@ -51,9 +48,8 @@ PROVIDE(sysTickHandler = nullHandler);
 SECTIONS
 {
   .text : {
-    *(.vectors)  /* Vector table */
+    KEEP (*(.vectors*)) /* Vector table */
     *(.text*)  /* Program code */
-    . = ALIGN(4);
     *(.rodata*)  /* Read-only data */
     . = ALIGN(4);
   } >rom
