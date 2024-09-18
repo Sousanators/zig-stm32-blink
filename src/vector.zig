@@ -8,6 +8,8 @@ export fn blockingHandler() callconv(.C) void {
 }
 
 export fn nullHandler() callconv(.C) void {}
+//testing a new handler
+export fn testHandler() callconv(.C) void {}
 
 // This comes from the linker script and represents the initial stack pointer address.
 // Not a function, but pretend it is to suppress type error
@@ -25,6 +27,39 @@ extern fn svCallHandler() void;
 extern fn debugMonitorHandler() void;
 extern fn pendSVHandler() void;
 extern fn sysTickHandler() void;
+//New
+extern fn wwdgHandler() void;
+extern fn tim2Handlder() void;
+extern fn pvdHandler() void;
+extern fn tamperStampHandler() void;
+extern fn rtcWakeupHandler() void;
+extern fn flashHandler() void;
+extern fn rccHandler() void;
+extern fn exti0Handler() void;
+extern fn exti1Handler() void;
+extern fn exti2_tsHandler() void;
+extern fn exti3Handler() void;
+extern fn exti4Handler() void;
+extern fn dma1_1Handler() void;
+extern fn dma1_2Handler() void;
+extern fn dma1_3Handler() void;
+extern fn dma1_4Handler() void;
+extern fn dma1_5Handler() void;
+extern fn dma1_6Handler() void;
+extern fn dma1_7Handler() void;
+extern fn adc1_2Handler() void;
+extern fn usb_hpHandler() void;
+extern fn usb_lpHandler() void;
+extern fn can_rx1Handler() void;
+extern fn can_sceHandler() void;
+extern fn exti9_5Handler() void;
+extern fn tim15Handler() void;
+extern fn tim16Handler() void;
+extern fn tim17Handler() void;
+extern fn tim1_ccHandler() void;
+extern fn tim2Handler() void;
+extern fn tim3Handler() void;
+extern fn tim4Handler() void;
 
 // The vector table
 export const vector_table linksection(".vectors") = [_]?Vector{
@@ -44,4 +79,36 @@ export const vector_table linksection(".vectors") = [_]?Vector{
     null, // Reserved 5
     pendSVHandler, // PendSV
     sysTickHandler, // SysTick
+    //New
+    wwdgHandler, //window watchdog
+    pvdHandler,
+    tamperStampHandler,
+    rtcWakeupHandler,
+    flashHandler,
+    rccHandler,
+    exti0Handler,
+    exti1Handler,
+    exti2_tsHandler,
+    exti3Handler,
+    exti4Handler,
+    dma1_1Handler,
+    dma1_2Handler,
+    dma1_3Handler,
+    dma1_4Handler,
+    dma1_5Handler,
+    dma1_6Handler,
+    dma1_7Handler,
+    adc1_2Handler,
+    usb_hpHandler,
+    usb_lpHandler,
+    can_rx1Handler,
+    can_sceHandler,
+    exti9_5Handler,
+    tim15Handler,
+    tim16Handler,
+    tim17Handler,
+    tim1_ccHandler,
+    tim2Handler,
+    tim3Handler,
+    tim4Handler,
 };

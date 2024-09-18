@@ -1,3 +1,5 @@
+//Next step: use an interrupt to toggle a different LED
+
 const regs = @import("registers.zig");
 
 pub fn main() void {

@@ -46,6 +46,37 @@ PROVIDE(svCallHandler = nullHandler);
 PROVIDE(debugMonitorHandler = nullHandler);
 PROVIDE(pendSVHandler = nullHandler);
 PROVIDE(sysTickHandler = nullHandler);
+PROVIDE(wwdgHandler = blockingHandler);
+PROVIDE(pvdHandler = blockingHandler);
+PROVIDE(tamperStampHandler = blockingHandler);
+PROVIDE(rtcWakeupHandler = blockingHandler);
+PROVIDE(flashHandler = blockingHandler);
+PROVIDE(rccHandler = blockingHandler);
+PROVIDE(exti0Handler = blockingHandler);
+PROVIDE(exti1Handler = blockingHandler);
+PROVIDE(exti2_tsHandler = blockingHandler);
+PROVIDE(exti3Handler = blockingHandler);
+PROVIDE(exti4Handler = blockingHandler);
+PROVIDE(dma1_1Handler = blockingHandler);
+PROVIDE(dma1_2Handler = blockingHandler);
+PROVIDE(dma1_3Handler = blockingHandler);
+PROVIDE(dma1_4Handler = blockingHandler);
+PROVIDE(dma1_5Handler = blockingHandler);
+PROVIDE(dma1_6Handler = blockingHandler);
+PROVIDE(dma1_7Handler = blockingHandler);
+PROVIDE(adc1_2Handler = blockingHandler);
+PROVIDE(usb_hpHandler = blockingHandler);
+PROVIDE(usb_lpHandler = blockingHandler);
+PROVIDE(can_rx1Handler = blockingHandler);
+PROVIDE(can_sceHandler = blockingHandler);
+PROVIDE(exti9_5Handler = blockingHandler);
+PROVIDE(tim15Handler = blockingHandler);
+PROVIDE(tim16Handler = blockingHandler);
+PROVIDE(tim17Handler = blockingHandler);
+PROVIDE(tim1_ccHandler = blockingHandler);
+PROVIDE(tim2Handler = blockingHandler);
+PROVIDE(tim3Handler = blockingHandler);
+PROVIDE(tim4Handler = blockingHandler);
 
 /* Define sections. */
 SECTIONS
