@@ -14,18 +14,12 @@ export fn resetHandler() callconv(.C) void {
     const data_size = @intFromPtr(&_edata) - @intFromPtr(&_data);
     const values = data_loadaddr[0..data_size];
     @memcpy(data, values);
-    // for (values, 0..) |v, i| {
-    //     data[i] = v;
-    // }
 
     // Clear the bss
     const bss: [*]u8 = @ptrCast(&_bss);
     const bss_size = @intFromPtr(&_ebss) - @intFromPtr(&_bss);
     const bss_region = bss[0..bss_size];
     @memset(bss_region, 0);
-    // for (bss_region) |*b| {
-    //     b.* = 0;
-    // }
 
     // Call contained in main.zig
     main();

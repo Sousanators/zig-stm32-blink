@@ -1,9 +1,6 @@
-//Next step: use an interrupt to toggle a different LED
-
 const regs = @import("registers.zig");
 
 pub fn main() void {
-    //systemInit();
     // Red LED on PE9
     // Enable GPIOE port
     regs.RCC.AHBENR.modify(.{ .IOPEEN = 0b1 });
@@ -23,113 +20,23 @@ pub fn main() void {
     //enable tim2 auto-reload buffering
     regs.TIM2.CR1.modify(.{ .ARPE = 1 });
 
-    //SPOOKY enable tim2 interrupt in NVIC?
-    regs.NVIC.NVIC_ISER0.modify(.{ .SETENA28 = 1 });
+    //Enable tim2 interrupt in NVIC. Should work on registers to make this more clear
+    regs.NVIC.ISER0.modify(.{ .SETENA28 = 1 });
 
     //enable tim2 update interrupt
     regs.TIM2.DIER.modify(.{ .UIE = 1 });
     //enable TIM2 count
     regs.TIM2.CR1.modify(.{ .CEN = 0b1 });
 
-    while (true) {
-        // Read the LED state
-        //const led_state = regs.GPIOE.ODR.read();
-        // Read tim2 status to check update interrupt flag
-        //const tim2_status = regs.TIM2.SR.read();
-
-        //if (tim2_status.UIF == 1) {
-        //    regs.GPIOE.ODR.modify(.{ .ODR9 = ~led_state.ODR9 });
-        //    regs.TIM2.SR.modify(.{ .UIF = 0 });
-        //}
-    }
+    //infinite do nothing while tim2 counts and toggles led
+    while (true) {}
 }
 
-export fn test_handler() callconv(.C) void {
+export fn tim2Handler() callconv(.C) void {
+    //Read LED state
     const led_state = regs.GPIOE.ODR.read();
+    //Invert LED state
     regs.GPIOE.ODR.modify(.{ .ODR9 = ~led_state.ODR9 });
+    //Clear TIM2 update interrupt flag
     regs.TIM2.SR.modify(.{ .UIF = 0 });
-}
-
-fn systemInit() void {
-    //Needs to be updated for this part STM32F303VC
-
-    // This init does these things:
-    // - Enables the FPU coprocessor
-    // - Sets the external oscillator to achieve a clock frequency of 168MHz
-    // - Sets the correct PLL prescalers for that clock frequency
-    // - Enables the flash data and instruction cache and sets the correct latency for 168MHz
-
-    // Enable FPU coprocessor
-    // WARN: currently not supported in qemu, comment if testing it there
-    //regs.FPU_CPACR.CPACR.modify(.{ .CP = 0b11 });
-
-    // Enable HSI
-    //regs.RCC.CR.modify(.{ .HSION = 1 });
-
-    // Wait for HSI ready
-    //while (regs.RCC.CR.read().HSIRDY != 1) {}
-
-    // Select HSI as clock source
-    //regs.RCC.CFGR.modify(.{ .SW0 = 0, .SW1 = 0 });
-
-    // Enable external high-speed oscillator (HSE)
-    //regs.RCC.CR.modify(.{ .HSEON = 1 });
-
-    // Wait for HSE ready
-    //while (regs.RCC.CR.read().HSERDY != 1) {}
-
-    // Set prescalers for 168 MHz: HPRE = 0, PPRE1 = DIV_2, PPRE2 = DIV_4
-    //regs.RCC.CFGR.modify(.{ .HPRE = 0, .PPRE1 = 0b101, .PPRE2 = 0b100 });
-
-    // Disable PLL before changing its configuration
-    //regs.RCC.CR.modify(.{ .PLLON = 0 });
-
-    // Set PLL prescalers and HSE clock source
-    // TODO: change the svd to expose prescalers as packed numbers instead of single bits
-    //regs.RCC.PLLCFGR.modify(.{
-    //    .PLLSRC = 1,
-    //    // PLLM = 8 = 0b001000
-    //    .PLLM0 = 0,
-    //    .PLLM1 = 0,
-    //    .PLLM2 = 0,
-    //    .PLLM3 = 1,
-    //    .PLLM4 = 0,
-    //    .PLLM5 = 0,
-    //    // PLLN = 336 = 0b101010000
-    //    .PLLN0 = 0,
-    //    .PLLN1 = 0,
-    //    .PLLN2 = 0,
-    //    .PLLN3 = 0,
-    //    .PLLN4 = 1,
-    //    .PLLN5 = 0,
-    //    .PLLN6 = 1,
-    //    .PLLN7 = 0,
-    //    .PLLN8 = 1,
-    //    // PLLP = 2 = 0b10
-    //    .PLLP0 = 0,
-    //    .PLLP1 = 1,
-    // PLLQ = 7 = 0b111
-    //    .PLLQ0 = 1,
-    //    .PLLQ1 = 1,
-    //   .PLLQ2 = 1,
-    //});
-
-    // Enable PLL
-    //regs.RCC.CR.modify(.{ .PLLON = 1 });
-
-    // Wait for PLL ready
-    //while (regs.RCC.CR.read().PLLRDY != 1) {}
-
-    // Enable flash data and instruction cache and set flash latency to 5 wait states
-    //regs.FLASH.ACR.modify(.{ .DCEN = 1, .ICEN = 1, .LATENCY = 5 });
-
-    // Select PLL as clock source
-    //regs.RCC.CFGR.modify(.{ .SW1 = 1, .SW0 = 0 });
-
-    // Wait for PLL selected as clock source
-    //var cfgr = regs.RCC.CFGR.read();
-    //while (cfgr.SWS1 != 1 and cfgr.SWS0 != 0) : (cfgr = regs.RCC.CFGR.read()) {}
-
-    // Disable HSI
-    //regs.RCC.CR.modify(.{ .HSION = 0 });
 }

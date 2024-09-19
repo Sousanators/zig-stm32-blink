@@ -18,12 +18,7 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Linker script for ST STM32F4DISCOVERY (STM32F407VG, 1024K flash, 128K RAM,
- * 64K Core Coupled Memory RAM).
- */
-
-/* Modified linker script for STM32F3DISCOVERY (STM32F303VC)
-*/
+/* Modified linker script for STM32F3DISCOVERY (STM32F303VC) */
 
 /* Define memory regions. */
 MEMORY
@@ -46,37 +41,37 @@ PROVIDE(svCallHandler = nullHandler);
 PROVIDE(debugMonitorHandler = nullHandler);
 PROVIDE(pendSVHandler = nullHandler);
 PROVIDE(sysTickHandler = nullHandler);
-PROVIDE(wwdgHandler = blockingHandler);
-PROVIDE(pvdHandler = blockingHandler);
-PROVIDE(tamperStampHandler = blockingHandler);
-PROVIDE(rtcWakeupHandler = blockingHandler);
-PROVIDE(flashHandler = blockingHandler);
-PROVIDE(rccHandler = blockingHandler);
-PROVIDE(exti0Handler = blockingHandler);
-PROVIDE(exti1Handler = blockingHandler);
-PROVIDE(exti2_tsHandler = blockingHandler);
-PROVIDE(exti3Handler = blockingHandler);
-PROVIDE(exti4Handler = blockingHandler);
-PROVIDE(dma1_1Handler = blockingHandler);
-PROVIDE(dma1_2Handler = blockingHandler);
-PROVIDE(dma1_3Handler = blockingHandler);
-PROVIDE(dma1_4Handler = blockingHandler);
-PROVIDE(dma1_5Handler = blockingHandler);
-PROVIDE(dma1_6Handler = blockingHandler);
-PROVIDE(dma1_7Handler = blockingHandler);
-PROVIDE(adc1_2Handler = blockingHandler);
-PROVIDE(usb_hpHandler = blockingHandler);
-PROVIDE(usb_lpHandler = blockingHandler);
-PROVIDE(can_rx1Handler = blockingHandler);
-PROVIDE(can_sceHandler = blockingHandler);
-PROVIDE(exti9_5Handler = blockingHandler);
-PROVIDE(tim15Handler = blockingHandler);
-PROVIDE(tim16Handler = blockingHandler);
-PROVIDE(tim17Handler = blockingHandler);
-PROVIDE(tim1_ccHandler = blockingHandler);
-PROVIDE(tim2Handler = test_handler);
-PROVIDE(tim3Handler = blockingHandler);
-PROVIDE(tim4Handler = blockingHandler);
+PROVIDE(wwdgHandler = nullHandler);
+PROVIDE(pvdHandler = nullHandler);
+PROVIDE(tamperStampHandler = nullHandler);
+PROVIDE(rtcWakeupHandler = nullHandler);
+PROVIDE(flashHandler = nullHandler);
+PROVIDE(rccHandler = nullHandler);
+PROVIDE(exti0Handler = nullHandler);
+PROVIDE(exti1Handler = nullHandler);
+PROVIDE(exti2_tsHandler = nullHandler);
+PROVIDE(exti3Handler = nullHandler);
+PROVIDE(exti4Handler = nullHandler);
+PROVIDE(dma1_1Handler = nullHandler);
+PROVIDE(dma1_2Handler = nullHandler);
+PROVIDE(dma1_3Handler = nullHandler);
+PROVIDE(dma1_4Handler = nullHandler);
+PROVIDE(dma1_5Handler = nullHandler);
+PROVIDE(dma1_6Handler = nullHandler);
+PROVIDE(dma1_7Handler = nullHandler);
+PROVIDE(adc1_2Handler = nullHandler);
+PROVIDE(usb_hpHandler = nullHandler);
+PROVIDE(usb_lpHandler = nullHandler);
+PROVIDE(can_rx1Handler = nullHandler);
+PROVIDE(can_sceHandler = nullHandler);
+PROVIDE(exti9_5Handler = nullHandler);
+PROVIDE(tim15Handler = nullHandler);
+PROVIDE(tim16Handler = nullHandler);
+PROVIDE(tim17Handler = nullHandler);
+PROVIDE(tim1_ccHandler = nullHandler);
+PROVIDE(tim2Handler = nullHandler);
+PROVIDE(tim3Handler = nullHandler);
+PROVIDE(tim4Handler = nullHandler);
 
 /* Define sections. */
 SECTIONS
