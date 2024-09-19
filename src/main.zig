@@ -12,19 +12,42 @@ pub fn main() void {
     regs.GPIOE.OTYPER.modify(.{ .OT9 = 0b0 });
     regs.GPIOE.OSPEEDR.modify(.{ .OSPEEDR9 = 0b00 });
     regs.GPIOE.PUPDR.modify(.{ .PUPDR9 = 0b00 });
+
+    //de-assert TIM2 reset
+    regs.RCC.APB1RSTR.modify(.{ .TIM2RST = 0 });
+    //enable TIM2 clock
+    regs.RCC.APB1ENR.modify(.{ .TIM2EN = 1 });
+    //set the reload value of tim2
+    //CNT starts at 0 and counts up to preload, then the update event occurs.
+    regs.TIM2.ARR.write_raw(0x0400000);
+    //enable tim2 auto-reload buffering
+    regs.TIM2.CR1.modify(.{ .ARPE = 1 });
+
+    //SPOOKY enable tim2 interrupt in NVIC?
+    regs.NVIC.NVIC_ISER0.modify(.{ .SETENA28 = 1 });
+
+    //enable tim2 update interrupt
+    regs.TIM2.DIER.modify(.{ .UIE = 1 });
+    //enable TIM2 count
+    regs.TIM2.CR1.modify(.{ .CEN = 0b1 });
+
     while (true) {
         // Read the LED state
-        const led_state = regs.GPIOE.ODR.read();
-        // Set the LED output to the negation of the currrent output
-        regs.GPIOE.ODR.modify(.{ .ODR9 = ~led_state.ODR9 });
+        //const led_state = regs.GPIOE.ODR.read();
+        // Read tim2 status to check update interrupt flag
+        //const tim2_status = regs.TIM2.SR.read();
 
-        // Sleep for some time
-        var i: u32 = 0;
-        while (i < 600000) {
-            asm volatile ("nop");
-            i += 1;
-        }
+        //if (tim2_status.UIF == 1) {
+        //    regs.GPIOE.ODR.modify(.{ .ODR9 = ~led_state.ODR9 });
+        //    regs.TIM2.SR.modify(.{ .UIF = 0 });
+        //}
     }
+}
+
+export fn test_handler() callconv(.C) void {
+    const led_state = regs.GPIOE.ODR.read();
+    regs.GPIOE.ODR.modify(.{ .ODR9 = ~led_state.ODR9 });
+    regs.TIM2.SR.modify(.{ .UIF = 0 });
 }
 
 fn systemInit() void {

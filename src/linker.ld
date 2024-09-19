@@ -74,7 +74,7 @@ PROVIDE(tim15Handler = blockingHandler);
 PROVIDE(tim16Handler = blockingHandler);
 PROVIDE(tim17Handler = blockingHandler);
 PROVIDE(tim1_ccHandler = blockingHandler);
-PROVIDE(tim2Handler = blockingHandler);
+PROVIDE(tim2Handler = test_handler);
 PROVIDE(tim3Handler = blockingHandler);
 PROVIDE(tim4Handler = blockingHandler);
 
