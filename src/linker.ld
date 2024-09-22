@@ -23,9 +23,8 @@
 /* Define memory regions. */
 MEMORY
 {
-  rom (rx) : ORIGIN = 0x08000000, LENGTH = 256K
-  ram (rwx) : ORIGIN = 0x20000000, LENGTH = 40K
-  ccm (rwx) : ORIGIN = 0x10000000, LENGTH = 8K
+  rom (rx) : ORIGIN = 0x08000000, LENGTH = 2048K
+  ram (rwx) : ORIGIN = 0x20000000, LENGTH = 512K
 }
 
 /* Define the entry point of the output file. */
@@ -49,25 +48,25 @@ PROVIDE(flashHandler = nullHandler);
 PROVIDE(rccHandler = nullHandler);
 PROVIDE(exti0Handler = nullHandler);
 PROVIDE(exti1Handler = nullHandler);
-PROVIDE(exti2_tsHandler = nullHandler);
+PROVIDE(exti2Handler = nullHandler);
 PROVIDE(exti3Handler = nullHandler);
 PROVIDE(exti4Handler = nullHandler);
+PROVIDE(dma1_0Handler = nullHandler);
 PROVIDE(dma1_1Handler = nullHandler);
 PROVIDE(dma1_2Handler = nullHandler);
 PROVIDE(dma1_3Handler = nullHandler);
 PROVIDE(dma1_4Handler = nullHandler);
 PROVIDE(dma1_5Handler = nullHandler);
 PROVIDE(dma1_6Handler = nullHandler);
-PROVIDE(dma1_7Handler = nullHandler);
-PROVIDE(adc1_2Handler = nullHandler);
-PROVIDE(usb_hpHandler = nullHandler);
-PROVIDE(usb_lpHandler = nullHandler);
-PROVIDE(can_rx1Handler = nullHandler);
-PROVIDE(can_sceHandler = nullHandler);
+PROVIDE(adc1_2_3Handler = nullHandler);
+PROVIDE(can1_txHandler = nullHandler);
+PROVIDE(can1_rx0Handler = nullHandler);
+PROVIDE(can1_rx1Handler = nullHandler);
+PROVIDE(can1_sceHandler = nullHandler);
 PROVIDE(exti9_5Handler = nullHandler);
-PROVIDE(tim15Handler = nullHandler);
-PROVIDE(tim16Handler = nullHandler);
-PROVIDE(tim17Handler = nullHandler);
+PROVIDE(tim1_brk_tim9Handler = nullHandler);
+PROVIDE(tim1_up_tim10Handler = nullHandler);
+PROVIDE(tim1_trg_com_tim11Handler = nullHandler);
 PROVIDE(tim1_ccHandler = nullHandler);
 PROVIDE(tim2Handler = nullHandler);
 PROVIDE(tim3Handler = nullHandler);
@@ -76,83 +75,114 @@ PROVIDE(tim4Handler = nullHandler);
 /* Define sections. */
 SECTIONS
 {
-  .text : {
+  .vectors : {
+    . = ALIGN(4);
     KEEP (*(.vectors*)) /* Vector table */
-    *(.text*)  /* Program code */
-    *(.rodata*)  /* Read-only data */
     . = ALIGN(4);
   } >rom
 
-  /* C++ Static constructors/destructors, also used for __attribute__
-   * ((constructor)) and the likes */
-  .preinit_array : {
+  .text :
+  {
     . = ALIGN(4);
-    __preinit_array_start = .;
-    KEEP (*(.preinit_array))
-    __preinit_array_end = .;
-  } >rom
-  .init_array : {
+    *(.text)           /* .text sections (code) */
+    *(.text*)          /* .text* sections (code) */
+    *(.glue_7)         /* glue arm to thumb code */
+    *(.glue_7t)        /* glue thumb to arm code */
+    *(.eh_frame)
+
+    KEEP (*(.init))
+    KEEP (*(.fini))
+
     . = ALIGN(4);
-    __init_array_start = .;
-    KEEP (*(SORT(.init_array.*)))
-    KEEP (*(.init_array))
-    __init_array_end = .;
-  } >rom
-  .fini_array : {
-    . = ALIGN(4);
-    __fini_array_start = .;
-    KEEP (*(.fini_array))
-    KEEP (*(SORT(.fini_array.*)))
-    __fini_array_end = .;
+    _etext = .;        /* define a global symbols at end of code */
   } >rom
 
-  /*
-   * Another section used by C++ stuff, appears when using newlib with
-   * 64bit (long long) printf support
-   */
-  .ARM.extab : {
+  /* Constant data into "FLASH" Rom type memory */
+  .rodata :
+  {
+    . = ALIGN(4);
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    . = ALIGN(4);
+  } >rom
+
+  .ARM.extab : 
+  {
+    . = ALIGN(4);
     *(.ARM.extab*)
+    . = ALIGN(4);
   } >rom
-  .ARM.exidx : {
+
+  .ARM :
+  {
+    . = ALIGN(4);
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
+    . = ALIGN(4);
   } >rom
 
-  . = ALIGN(4);
-  _etext = .;
-
-  /* ram, but not cleared on reset, eg boot/app comms */
-  .noinit (NOLOAD) : {
-    *(.noinit*)
-  } >ram
-  . = ALIGN(4);
-
-  .data : {
-    _data = .;
-    *(.data*)  /* Read-write initialized data */
-    *(.ramtext*)    /* "text" functions to run in ram */
+  .preinit_array :
+  {
     . = ALIGN(4);
-    _edata = .;
-  } >ram AT >rom
-  _data_loadaddr = LOADADDR(.data);
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP (*(.preinit_array*))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+    . = ALIGN(4);
+  } >rom
 
-  .bss : {
-    _bss = .;
-    *(.bss*)  /* Read-write zero initialized data */
+  .init_array :
+  {
+    . = ALIGN(4);
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array*))
+    PROVIDE_HIDDEN (__init_array_end = .);
+    . = ALIGN(4);
+  } >rom
+
+  .fini_array :
+  {
+    . = ALIGN(4);
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP (*(SORT(.fini_array.*)))
+    KEEP (*(.fini_array*))
+    PROVIDE_HIDDEN (__fini_array_end = .);
+    . = ALIGN(4);
+  } >rom
+
+  /* Used by the startup to initialize data */
+   _data_loadaddr = LOADADDR(.data);
+
+  /* Initialized data sections into "RAM" Ram type memory */
+  .data :
+  {
+    . = ALIGN(4);
+    _data = .;        /* create a global symbol at data start */
+    *(.data)           /* .data sections */
+    *(.data*)          /* .data* sections */
+    *(.RamFunc)        /* .RamFunc sections */
+    *(.RamFunc*)       /* .RamFunc* sections */
+
+    . = ALIGN(4);
+    _edata = .;        /* define a global symbol at data end */
+
+  } >ram AT> rom
+
+  /* Uninitialized data section into "RAM" Ram type memory */
+  . = ALIGN(4);
+  .bss :
+  {
+    /* This is used by the startup in order to initialize the .bss section */
+    _bss = .;         /* define a global symbol at bss start */
+    __bss_start__ = _bss;
+    *(.bss)
+    *(.bss*)
     *(COMMON)
+
     . = ALIGN(4);
-    _ebss = .;
+    _ebss = .;         /* define a global symbol at bss end */
+    __bss_end__ = _ebss;
   } >ram
-
-  /*
-   * The .eh_frame section appears to be used for C++ exception handling.
-   * You may need to fix this if you're using C++.
-   */
-  /DISCARD/ : { *(.eh_frame) }
-
-  . = ALIGN(4);
-  end = .;
 }
-
 PROVIDE(_stack = ORIGIN(ram) + LENGTH(ram));

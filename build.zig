@@ -6,7 +6,7 @@ pub fn build(b: *std.Build) void {
     // Target STM32F303VC
     const target = b.standardTargetOptions(.{ .default_target = .{
         .cpu_arch = .thumb,
-        .cpu_model = .{ .explicit = &std.Target.arm.cpu.cortex_m4 },
+        .cpu_model = .{ .explicit = &std.Target.arm.cpu.cortex_m7 },
         .os_tag = .freestanding,
         .abi = .eabihf,
     } });

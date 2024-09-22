@@ -33,25 +33,25 @@ extern fn flashHandler() void;
 extern fn rccHandler() void;
 extern fn exti0Handler() void;
 extern fn exti1Handler() void;
-extern fn exti2_tsHandler() void;
+extern fn exti2Handler() void;
 extern fn exti3Handler() void;
 extern fn exti4Handler() void;
+extern fn dma1_0Handler() void;
 extern fn dma1_1Handler() void;
 extern fn dma1_2Handler() void;
 extern fn dma1_3Handler() void;
 extern fn dma1_4Handler() void;
 extern fn dma1_5Handler() void;
 extern fn dma1_6Handler() void;
-extern fn dma1_7Handler() void;
-extern fn adc1_2Handler() void;
-extern fn usb_hpHandler() void;
-extern fn usb_lpHandler() void;
-extern fn can_rx1Handler() void;
-extern fn can_sceHandler() void;
+extern fn adc1_2_3Handler() void;
+extern fn can1_txHandler() void;
+extern fn can1_rx0Handler() void;
+extern fn can1_rx1Handler() void;
+extern fn can1_sceHandler() void;
 extern fn exti9_5Handler() void;
-extern fn tim15Handler() void;
-extern fn tim16Handler() void;
-extern fn tim17Handler() void;
+extern fn tim1_brk_tim9Handler() void;
+extern fn tim1_up_tim10Handler() void;
+extern fn tim1_trg_com_tim11Handler() void;
 extern fn tim1_ccHandler() void;
 extern fn tim2Handler() void;
 extern fn tim3Handler() void;
@@ -84,25 +84,25 @@ export const vector_table linksection(".vectors") = [_]?Vector{
     rccHandler,
     exti0Handler,
     exti1Handler,
-    exti2_tsHandler,
+    exti2Handler,
     exti3Handler,
     exti4Handler,
+    dma1_0Handler,
     dma1_1Handler,
     dma1_2Handler,
     dma1_3Handler,
     dma1_4Handler,
     dma1_5Handler,
     dma1_6Handler,
-    dma1_7Handler,
-    adc1_2Handler,
-    usb_hpHandler,
-    usb_lpHandler,
-    can_rx1Handler,
-    can_sceHandler,
+    adc1_2_3Handler,
+    can1_txHandler,
+    can1_rx0Handler,
+    can1_rx1Handler,
+    can1_sceHandler,
     exti9_5Handler,
-    tim15Handler,
-    tim16Handler,
-    tim17Handler,
+    tim1_brk_tim9Handler,
+    tim1_up_tim10Handler,
+    tim1_trg_com_tim11Handler,
     tim1_ccHandler,
     tim2Handler,
     tim3Handler,
