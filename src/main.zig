@@ -1,7 +1,9 @@
 const regs = @import("registers.zig");
+const usb = @import("usb.zig");
 
 pub fn main() void {
-    systemInit();
+    initSystem();
+    usb.usbInit();
     initLED();
     initTim2();
     //enable TIM2 count
@@ -9,8 +11,7 @@ pub fn main() void {
     while (true) {}
 }
 
-fn systemInit() void {
-    //copied from the cube hal
+fn initSystem() void {
     //enable access to the rtc, backup registers and sram
     regs.PWR.CR1.modify(.{ .DBP = 1 });
     //power interface clock enable
@@ -45,11 +46,11 @@ fn systemInit() void {
         .PLLM3 = 0,
         .PLLM4 = 0,
         .PLLM5 = 0,
-        //n = c8 (x200)
+        //n = c0 (x192)
         .PLLN0 = 0,
         .PLLN1 = 0,
         .PLLN2 = 0,
-        .PLLN3 = 1,
+        .PLLN3 = 0,
         .PLLN4 = 0,
         .PLLN5 = 0,
         .PLLN6 = 1,
@@ -58,11 +59,11 @@ fn systemInit() void {
         //p = 0 (/2)
         .PLLP0 = 0,
         .PLLP1 = 0,
-        //q = 4 (/4)
+        //q = 8 (/8)
         .PLLQ0 = 0,
         .PLLQ1 = 0,
-        .PLLQ2 = 1,
-        .PLLQ3 = 0,
+        .PLLQ2 = 0,
+        .PLLQ3 = 1,
         //r = 2 (reset val, must be true)
         //error in registers having this as 'PPL'?
         .PPLR0 = 0,

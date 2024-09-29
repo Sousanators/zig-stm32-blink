@@ -5,7 +5,9 @@ export fn blockingHandler() callconv(.C) void {
     while (true) {}
 }
 
-export fn nullHandler() callconv(.C) void {}
+export fn nullHandler() callconv(.C) void {
+    while (true) {}
+}
 
 // This comes from the linker script and represents the initial stack pointer address.
 // Not a function, but pretend it is to suppress type error
@@ -56,6 +58,43 @@ extern fn tim1_ccHandler() void;
 extern fn tim2Handler() void;
 extern fn tim3Handler() void;
 extern fn tim4Handler() void;
+extern fn i2c1_evHandler() void;
+extern fn i2c1_erHandler() void;
+extern fn i2c2_evHandler() void;
+extern fn inc2_erHandler() void;
+extern fn spi1Handler() void;
+extern fn spi2Handler() void;
+extern fn usart1Handler() void;
+extern fn usart2Handler() void;
+extern fn usart3Handler() void;
+extern fn exti15_10Handler() void;
+extern fn rtc_alarmHandler() void;
+extern fn otg_fs_wkupHandler() void;
+extern fn tim8_brk_tim12Hanlder() void;
+extern fn tim8_up_tim13Handler() void;
+extern fn tim8_trg_com_tim14Hanlder() void;
+extern fn tim8_ccHandler() void;
+extern fn dma1_stream7Handler() void;
+extern fn fsmcHanlder() void;
+extern fn sdmmc1Handler() void;
+extern fn tim5Hanlder() void;
+extern fn spi3Hanlder() void;
+extern fn uart4Handler() void;
+extern fn uart5Handler() void;
+extern fn tim6_dacHanlder() void;
+extern fn tim7Handler() void;
+extern fn dma2_stream0Handler() void;
+extern fn dma2_stream1Hanlder() void;
+extern fn dma2_stream2Hanlder() void;
+extern fn dma2_stream3Handler() void;
+extern fn dma2_stream4Handler() void;
+extern fn ethHandler() void;
+extern fn eth_wkupHandler() void;
+extern fn can2_txHandler() void;
+extern fn can2_rx0Handler() void;
+extern fn can2_rx1Handler() void;
+extern fn can2_sceHanlder() void;
+extern fn otg_fsHanlder() void;
 
 // The vector table
 export const vector_table linksection(".vectors") = [_]?Vector{
@@ -107,4 +146,41 @@ export const vector_table linksection(".vectors") = [_]?Vector{
     tim2Handler,
     tim3Handler,
     tim4Handler,
+    i2c1_evHandler,
+    i2c1_erHandler,
+    i2c2_evHandler,
+    inc2_erHandler,
+    spi1Handler,
+    spi2Handler,
+    usart1Handler,
+    usart2Handler,
+    usart3Handler,
+    exti15_10Handler,
+    rtc_alarmHandler,
+    otg_fs_wkupHandler,
+    tim8_brk_tim12Hanlder,
+    tim8_up_tim13Handler,
+    tim8_trg_com_tim14Hanlder,
+    tim8_ccHandler,
+    dma1_stream7Handler,
+    fsmcHanlder,
+    sdmmc1Handler,
+    tim5Hanlder,
+    spi3Hanlder,
+    uart4Handler,
+    uart5Handler,
+    tim6_dacHanlder,
+    tim7Handler,
+    dma2_stream0Handler,
+    dma2_stream1Hanlder,
+    dma2_stream2Hanlder,
+    dma2_stream3Handler,
+    dma2_stream4Handler,
+    ethHandler,
+    eth_wkupHandler,
+    can2_txHandler,
+    can2_rx0Handler,
+    can2_rx1Handler,
+    can2_sceHanlder,
+    otg_fsHanlder,
 };

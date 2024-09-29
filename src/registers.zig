@@ -22,7 +22,7 @@ pub fn RegisterRW(comptime Read: type, comptime Write: type) type {
             return registers;
         }
 
-        pub fn read(self: Self) Read {
+        pub inline fn read(self: Self) Read {
             return @bitCast(self.raw_ptr.*);
         }
 
@@ -49,11 +49,11 @@ pub fn RegisterRW(comptime Read: type, comptime Write: type) type {
             self.write(old_value);
         }
 
-        pub fn read_raw(self: Self) u32 {
+        pub inline fn read_raw(self: Self) u32 {
             return self.raw_ptr.*;
         }
 
-        pub fn write_raw(self: Self, value: u32) void {
+        pub inline fn write_raw(self: Self, value: u32) void {
             self.raw_ptr.* = value;
         }
 
@@ -66564,7 +66564,9 @@ pub const OTG_FS_DEVICE = struct {
         INEPNEM: u1 = 0,
         /// unused [7:31]
         _unused7: u1 = 0,
-        _unused8: u8 = 0,
+        /// TXFURM [8:8]
+        TXFURM: u1 = 0,
+        _unused9: u7 = 0,
         _unused16: u8 = 0,
         _unused24: u8 = 0,
     };
@@ -74849,7 +74851,7 @@ pub const interrupts = struct {
 
 // Added NVIC
 pub const NVIC = struct {
-    const base_address = 0xE000E100;
+    const base_address = 0xE000E000;
     //NVIC_ISER0
     const ISER0_val = packed struct {
         SETENA0: u1 = 0,
@@ -74885,79 +74887,79 @@ pub const NVIC = struct {
         SETENA30: u1 = 0,
         SETENA31: u1 = 0,
     };
-    pub const ISER0 = Register(ISER0_val).init(base_address + 0x0);
+    pub const ISER0 = Register(ISER0_val).init(base_address + 0x100);
     //NVIC_ISER1
     const ISER1_val = packed struct {
-        SETENA0: u1 = 0,
-        SETENA1: u1 = 0,
-        SETENA2: u1 = 0,
-        SETENA3: u1 = 0,
-        SETENA4: u1 = 0,
-        SETENA5: u1 = 0,
-        SETENA6: u1 = 0,
-        SETENA7: u1 = 0,
-        SETENA8: u1 = 0,
-        SETENA9: u1 = 0,
-        SETENA10: u1 = 0,
-        SETENA11: u1 = 0,
-        SETENA12: u1 = 0,
-        SETENA13: u1 = 0,
-        SETENA14: u1 = 0,
-        SETENA15: u1 = 0,
-        SETENA16: u1 = 0,
-        SETENA17: u1 = 0,
-        SETENA18: u1 = 0,
-        SETENA19: u1 = 0,
-        SETENA20: u1 = 0,
-        SETENA21: u1 = 0,
-        SETENA22: u1 = 0,
-        SETENA23: u1 = 0,
-        SETENA24: u1 = 0,
-        SETENA25: u1 = 0,
-        SETENA26: u1 = 0,
-        SETENA27: u1 = 0,
-        SETENA28: u1 = 0,
-        SETENA29: u1 = 0,
-        SETENA30: u1 = 0,
-        SETENA31: u1 = 0,
+        SETENA32: u1 = 0,
+        SETENA33: u1 = 0,
+        SETENA34: u1 = 0,
+        SETENA35: u1 = 0,
+        SETENA36: u1 = 0,
+        SETENA37: u1 = 0,
+        SETENA38: u1 = 0,
+        SETENA39: u1 = 0,
+        SETENA40: u1 = 0,
+        SETENA41: u1 = 0,
+        SETENA42: u1 = 0,
+        SETENA43: u1 = 0,
+        SETENA44: u1 = 0,
+        SETENA45: u1 = 0,
+        SETENA46: u1 = 0,
+        SETENA47: u1 = 0,
+        SETENA48: u1 = 0,
+        SETENA49: u1 = 0,
+        SETENA50: u1 = 0,
+        SETENA51: u1 = 0,
+        SETENA52: u1 = 0,
+        SETENA53: u1 = 0,
+        SETENA54: u1 = 0,
+        SETENA55: u1 = 0,
+        SETENA56: u1 = 0,
+        SETENA57: u1 = 0,
+        SETENA58: u1 = 0,
+        SETENA59: u1 = 0,
+        SETENA60: u1 = 0,
+        SETENA61: u1 = 0,
+        SETENA62: u1 = 0,
+        SETENA63: u1 = 0,
     };
-    pub const ISER1 = Register(ISER1_val).init(base_address + 0x4);
+    pub const ISER1 = Register(ISER1_val).init(base_address + 0x104);
     //NVIC_ISER2
     const ISER2_val = packed struct {
-        SETENA0: u1 = 0,
-        SETENA1: u1 = 0,
-        SETENA2: u1 = 0,
-        SETENA3: u1 = 0,
-        SETENA4: u1 = 0,
-        SETENA5: u1 = 0,
-        SETENA6: u1 = 0,
-        SETENA7: u1 = 0,
-        SETENA8: u1 = 0,
-        SETENA9: u1 = 0,
-        SETENA10: u1 = 0,
-        SETENA11: u1 = 0,
-        SETENA12: u1 = 0,
-        SETENA13: u1 = 0,
-        SETENA14: u1 = 0,
-        SETENA15: u1 = 0,
-        SETENA16: u1 = 0,
-        SETENA17: u1 = 0,
-        SETENA18: u1 = 0,
-        SETENA19: u1 = 0,
-        SETENA20: u1 = 0,
-        SETENA21: u1 = 0,
-        SETENA22: u1 = 0,
-        SETENA23: u1 = 0,
-        SETENA24: u1 = 0,
-        SETENA25: u1 = 0,
-        SETENA26: u1 = 0,
-        SETENA27: u1 = 0,
-        SETENA28: u1 = 0,
-        SETENA29: u1 = 0,
-        SETENA30: u1 = 0,
-        SETENA31: u1 = 0,
+        SETENA64: u1 = 0,
+        SETENA65: u1 = 0,
+        SETENA66: u1 = 0,
+        SETENA67: u1 = 0,
+        SETENA68: u1 = 0,
+        SETENA69: u1 = 0,
+        SETENA70: u1 = 0,
+        SETENA71: u1 = 0,
+        SETENA72: u1 = 0,
+        SETENA73: u1 = 0,
+        SETENA74: u1 = 0,
+        SETENA75: u1 = 0,
+        SETENA76: u1 = 0,
+        SETENA77: u1 = 0,
+        SETENA78: u1 = 0,
+        SETENA79: u1 = 0,
+        SETENA80: u1 = 0,
+        SETENA81: u1 = 0,
+        SETENA82: u1 = 0,
+        SETENA83: u1 = 0,
+        SETENA84: u1 = 0,
+        SETENA85: u1 = 0,
+        SETENA86: u1 = 0,
+        SETENA87: u1 = 0,
+        SETENA88: u1 = 0,
+        SETENA89: u1 = 0,
+        SETENA90: u1 = 0,
+        SETENA91: u1 = 0,
+        SETENA92: u1 = 0,
+        SETENA93: u1 = 0,
+        SETENA94: u1 = 0,
+        SETENA95: u1 = 0,
     };
-    pub const ISER2 = Register(ISER2_val).init(base_address + 0x8);
+    pub const ISER2 = Register(ISER2_val).init(base_address + 0x108);
     //NVIC_ISER3
     const ISER3_val = packed struct {
         SETENA0: u1 = 0,
@@ -74993,7 +74995,7 @@ pub const NVIC = struct {
         SETENA30: u1 = 0,
         SETENA31: u1 = 0,
     };
-    pub const ISER3 = Register(ISER3_val).init(base_address + 0xC);
+    pub const ISER3 = Register(ISER3_val).init(base_address + 0x10C);
     //NVIC_ISER4
     const ISER4_val = packed struct {
         SETENA0: u1 = 0,
@@ -75029,7 +75031,7 @@ pub const NVIC = struct {
         SETENA30: u1 = 0,
         SETENA31: u1 = 0,
     };
-    pub const ISER4 = Register(ISER4_val).init(base_address + 0x10);
+    pub const ISER4 = Register(ISER4_val).init(base_address + 0x110);
     //NVIC_ISER5
     const ISER5_val = packed struct {
         SETENA0: u1 = 0,
@@ -75065,7 +75067,7 @@ pub const NVIC = struct {
         SETENA30: u1 = 0,
         SETENA31: u1 = 0,
     };
-    pub const ISER5 = Register(ISER5_val).init(base_address + 0x14);
+    pub const ISER5 = Register(ISER5_val).init(base_address + 0x114);
     //NVIC_ISER6
     const ISER6_val = packed struct {
         SETENA0: u1 = 0,
@@ -75101,7 +75103,7 @@ pub const NVIC = struct {
         SETENA30: u1 = 0,
         SETENA31: u1 = 0,
     };
-    pub const ISER6 = Register(ISER6_val).init(base_address + 0x18);
+    pub const ISER6 = Register(ISER6_val).init(base_address + 0x118);
     //NVIC_ISER7
     const ISER7_val = packed struct {
         SETENA0: u1 = 0,
@@ -75137,7 +75139,7 @@ pub const NVIC = struct {
         SETENA30: u1 = 0,
         SETENA31: u1 = 0,
     };
-    pub const ISER7 = Register(ISER7_val).init(base_address + 0x1C);
+    pub const ISER7 = Register(ISER7_val).init(base_address + 0x11C);
     //NVIC_ICER0
     const ICER0_val = packed struct {
         CLRENA0: u1 = 0,
@@ -75173,5 +75175,73 @@ pub const NVIC = struct {
         CLRENA30: u1 = 0,
         CLRENA31: u1 = 0,
     };
-    pub const ICER0 = Register(ICER0_val).init(base_address + 0x80);
+    pub const ICER0 = Register(ICER0_val).init(base_address + 0x180);
+    const ICER2_val = packed struct {
+        CLRENA64: u1 = 0,
+        CLRENA65: u1 = 0,
+        CLRENA66: u1 = 0,
+        CLRENA67: u1 = 0,
+        CLRENA68: u1 = 0,
+        CLRENA69: u1 = 0,
+        CLRENA70: u1 = 0,
+        CLRENA71: u1 = 0,
+        CLRENA72: u1 = 0,
+        CLRENA73: u1 = 0,
+        CLRENA74: u1 = 0,
+        CLRENA75: u1 = 0,
+        CLRENA76: u1 = 0,
+        CLRENA77: u1 = 0,
+        CLRENA78: u1 = 0,
+        CLRENA79: u1 = 0,
+        CLRENA80: u1 = 0,
+        CLRENA81: u1 = 0,
+        CLRENA82: u1 = 0,
+        CLRENA83: u1 = 0,
+        CLRENA84: u1 = 0,
+        CLRENA85: u1 = 0,
+        CLRENA86: u1 = 0,
+        CLRENA87: u1 = 0,
+        CLRENA88: u1 = 0,
+        CLRENA89: u1 = 0,
+        CLRENA90: u1 = 0,
+        CLRENA91: u1 = 0,
+        CLRENA92: u1 = 0,
+        CLRENA93: u1 = 0,
+        CLRENA94: u1 = 0,
+        CLRENA95: u1 = 0,
+    };
+    pub const ICER2 = Register(ICER2_val).init(base_address + 0x188);
+    //NVIC_IPR0
+    const IPR0_val = packed struct {
+        PRIN0: u8 = 0,
+        PRIN1: u8 = 0,
+        PRIN2: u8 = 0,
+        PRIN3: u8 = 0,
+    };
+    pub const IPR0 = Register(IPR0_val).init(base_address + 0x400);
+    //NVIC_IPR16, OTG_FS global is IRQ67
+    const IPR16_val = packed struct {
+        PRIN64: u8 = 0,
+        PRIN65: u8 = 0,
+        PRIN66: u8 = 0,
+        PRIN67: u8 = 0,
+    };
+    pub const IPR16 = Register(IPR16_val).init(base_address + 0x458);
+};
+
+//Added System Control Block
+pub const SCB = struct {
+    const base_address = 0xE000E000;
+
+    //SCB_ACTLR Auxiliary control register
+    const ACTLR_val = packed struct {
+        _unused0: u2 = 0,
+        DISFOLD: u1 = 0,
+        _unused3: u7 = 0,
+        FPEXCODIS: u1 = 0,
+        DISRAMODE: u1 = 0,
+        DISITMATBFLUSH: u1 = 0,
+        _unused13: u19 = 0,
+    };
+    pub const ACTLR = Register(ACTLR_val).init(base_address + 0x8);
 };
