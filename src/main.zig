@@ -4,6 +4,8 @@ const usb = @import("usb.zig");
 pub fn main() void {
     initSystem();
     usb.usbInit();
+    //usb.registerClass();
+    usb.start();
     initLED();
     initTim2();
     //enable TIM2 count
@@ -134,7 +136,7 @@ fn initTim2() void {
     regs.TIM2.ARR.write_raw(0x0400000);
     //enable tim2 auto-reload buffering
     regs.TIM2.CR1.modify(.{ .ARPE = 1 });
-    //Enable tim2 interrupt in NVIC. Should work on registers to make this more clear
+    //Enable tim2 interrupt in NVIC. Shmould work on registers to make this more clear
     regs.NVIC.ISER0.modify(.{ .SETENA28 = 1 });
     //enable tim2 update interrupt
     regs.TIM2.DIER.modify(.{ .UIE = 1 });
@@ -147,4 +149,25 @@ export fn tim2Handler() callconv(.C) void {
     regs.GPIOB.ODR.modify(.{ .ODR0 = ~led_state.ODR0 });
     //Clear TIM2 update interrupt flag
     regs.TIM2.SR.modify(.{ .UIF = 0 });
+}
+
+export fn otg_fsHanlder() callconv(.C) void {
+    //upon enabling with no usb connected, we have:
+    //NPTXFE
+    //**ESUSP
+    //**USBSUSP
+    //EOPF
+    //PTXFE
+
+    //after connecting, we have:
+    //SOF       -> new
+    //RXFLVL    -> new
+    //NPTXFE
+    //ESUSP
+    //USBSUSP
+    //ENUMDNE
+    //EOPF
+    //RSTDET
+    //PTXFE
+    while (true) {}
 }

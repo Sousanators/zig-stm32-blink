@@ -1,6 +1,8 @@
 const regs = @import("registers.zig");
 
 pub fn usbInit() void { //base on HAL_PCD_Init
+    //enable clocks and pins
+    hardwareInit();
     //clear interrupt mask
     regs.OTG_FS_GLOBAL.OTG_FS_GAHBCFG.modify(.{ .GINT = 1 });
     //Init the core
@@ -35,20 +37,23 @@ pub fn usbInit() void { //base on HAL_PCD_Init
     regs.OTG_FS_DEVICE.OTG_FS_DIEPMSK.modify(.{ .TXFURM = 0 });
     //disable all interrupts
     regs.OTG_FS_GLOBAL.OTG_FS_GINTMSK.write_raw(0);
-    //clear int flags. Everything except SRQINT
-    regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.write_raw(0xBFFFFFFF);
+    //clear all int flags.
+    regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.write_raw(0xFFFFFFFF);
     //enable common interrupts when dma disabled
     regs.OTG_FS_GLOBAL.OTG_FS_GINTMSK.modify(.{ .RXFLVLM = 1 });
     //enable interrupts which match device mode
     regs.OTG_FS_GLOBAL.OTG_FS_GINTMSK.modify(.{
-        .USBSUSPM = 1,
-        .USBRST = 1,
-        .ENUMDNEM = 1,
-        .IEPINT = 1,
-        .OEPINT = 1,
-        .IISOIXFRM = 1,
-        .IPXFRM_IISOOXFRM = 1,
-        .WUIM = 1,
+        //.USBRST = 1,
+        //.ENUMDNEM = 1,
+        //.ESUSPM = 1,
+        //.USBSUSPM = 1,
+        //.SOFM = 1,
+        .SRQIM = 1,
+        //.IEPINT = 1,
+        //.OEPINT = 1,
+        //.IISOIXFRM = 1,
+        //.IPXFRM_IISOOXFRM = 1,
+        //.WUIM = 1,
     });
     //enable SoF and vbus sense interrupt if needed
     //enable link power management (LPM) if needed
@@ -78,8 +83,6 @@ pub fn registerClass() void {
 pub fn start() void {
     //enable PCD global interrupts
     regs.OTG_FS_GLOBAL.OTG_FS_GAHBCFG.modify(.{ .GINT = 1 });
-    //configure clocks and pins
-    hardwareInit();
     //Start connect device
     deviceConnect();
 }
@@ -117,7 +120,6 @@ fn hardwareInit() void {
     });
     regs.GPIOA.AFRH.modify(.{ //alternate function sel
         .AFRH8 = 0xA, //0xA = AF10 = USBOTGFS
-        .AFRH9 = 0xA,
         .AFRH10 = 0xA,
         .AFRH11 = 0xA,
         .AFRH12 = 0xA,
@@ -131,13 +133,13 @@ fn hardwareInit() void {
 
 fn resetCore() void {
     //wait for AHB idle
-    var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
-    while (grstctlState.AHBIDL != 0) {
-        grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
-    }
+    //var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    //while (grstctlState.AHBIDL != 0) {
+    //    grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    //}
     //core soft reset. Self clearing when done
     regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.modify(.{ .CSRST = 1 });
-    grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
     while (grstctlState.CSRST != 0) {
         grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
     }
@@ -153,8 +155,8 @@ fn devInit() void {
     regs.OTG_FS_GLOBAL.OTG_FS_DIEPTXF5.write_raw(0);
     //assert soft disconnect
     regs.OTG_FS_DEVICE.OTG_FS_DCTL.modify(.{ .SDIS = 1 });
-    //deactive vbus sensing
-    regs.OTG_FS_GLOBAL.OTG_FS_GCCFG.modify(.{ .VBDEN = 0 });
+    //enable vbus sensing
+    regs.OTG_FS_GLOBAL.OTG_FS_GCCFG.modify(.{ .VBDEN = 1 });
     //override the Bvalid signal with '1'
     regs.OTG_FS_GLOBAL.OTG_FS_GOTGCTL.modify(.{ .BVALOEN = 1, .BVALOVAL = 1 });
     //restart phy clock. Little confused about this, but just follow the stm32 hal
@@ -169,16 +171,16 @@ fn devInit() void {
 
 fn flushTxFIFOs() void {
     //wait for AHB idle
-    var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
-    while (grstctlState.AHBIDL != 0) {
-        grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
-    }
+    //var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    //while (grstctlState.AHBIDL != 0) {
+    //    grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    //}
     //set flush all FIFOs
     regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.modify(.{ .TXFNUM = 0b10000 });
     //start flush
     regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.modify(.{ .TXFFLSH = 1 });
     //wait for core to clear the bit
-    grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
     while (grstctlState.TXFFLSH != 0) {
         grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
     }
@@ -186,14 +188,14 @@ fn flushTxFIFOs() void {
 
 fn flushRxFIFOs() void {
     //wait for AHB idle
-    var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
-    while (grstctlState.AHBIDL != 0) {
-        grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
-    }
+    //var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    //while (grstctlState.AHBIDL != 0) {
+    //    grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    //}
     //This bit flushes all RX FIFOs
     regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.modify(.{ .RXFFLSH = 1 });
     //wait for core to clear the bit
-    grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
+    var grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
     while (grstctlState.RXFFLSH != 0) {
         grstctlState = regs.OTG_FS_GLOBAL.OTG_FS_GRSTCTL.read();
     }
@@ -234,19 +236,19 @@ fn epOutInit() void {
     regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL4.write_raw(0);
     regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL5.write_raw(0);
     //clear IN endpoint transfer size registers
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ0.write_raw(0);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ1.write_raw(0);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ2.write_raw(0);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ3.write_raw(0);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ4.write_raw(0);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ5.write_raw(0);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ0.write_raw(0);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ1.write_raw(0);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ2.write_raw(0);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ3.write_raw(0);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ4.write_raw(0);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ5.write_raw(0);
     //clear IN endpoint interrupts. Magic value taken from stm32 hal. Makes no sense to me yet.
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPINT0.write_raw(0x0000FB7F);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPINT1.write_raw(0x0000FB7F);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPINT2.write_raw(0x0000FB7F);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPINT3.write_raw(0x0000FB7F);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPINT4.write_raw(0x0000FB7F);
-    //regs.OTG_FS_DEVICE.OTG_FS_DOEPINT5.write_raw(0x0000FB7F);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPINT0.write_raw(0x0000FB7F);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPINT1.write_raw(0x0000FB7F);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPINT2.write_raw(0x0000FB7F);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPINT3.write_raw(0x0000FB7F);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPINT4.write_raw(0x0000FB7F);
+    regs.OTG_FS_DEVICE.OTG_FS_DOEPINT5.write_raw(0x0000FB7F);
 }
 
 fn deviceDisconnect() void {
