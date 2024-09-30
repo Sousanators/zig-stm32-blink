@@ -3,8 +3,8 @@ const regs = @import("registers.zig");
 pub fn usbInit() void { //base on HAL_PCD_Init
     //enable clocks and pins
     hardwareInit();
-    //clear interrupt mask
-    regs.OTG_FS_GLOBAL.OTG_FS_GAHBCFG.modify(.{ .GINT = 1 });
+    //mask interrupts before starting
+    regs.OTG_FS_GLOBAL.OTG_FS_GAHBCFG.modify(.{ .GINT = 0 });
     //Init the core
     //Setup embedded FS PHY
     //for FS this bit is always 1 with RO access, but do it anyways?
@@ -33,22 +33,22 @@ pub fn usbInit() void { //base on HAL_PCD_Init
     regs.OTG_FS_DEVICE.OTG_FS_DAINTMSK.write_raw(0);
     epInInit();
     epOutInit();
+
     //set common endpoint interrupt mask
     regs.OTG_FS_DEVICE.OTG_FS_DIEPMSK.modify(.{ .TXFURM = 0 });
     //disable all interrupts
     regs.OTG_FS_GLOBAL.OTG_FS_GINTMSK.write_raw(0);
     //clear all int flags.
     regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.write_raw(0xFFFFFFFF);
-    //enable common interrupts when dma disabled
-    regs.OTG_FS_GLOBAL.OTG_FS_GINTMSK.modify(.{ .RXFLVLM = 1 });
     //enable interrupts which match device mode
     regs.OTG_FS_GLOBAL.OTG_FS_GINTMSK.modify(.{
-        //.USBRST = 1,
-        //.ENUMDNEM = 1,
-        //.ESUSPM = 1,
-        //.USBSUSPM = 1,
-        //.SOFM = 1,
         .SRQIM = 1,
+        .USBRST = 1,
+        .ENUMDNEM = 1,
+        .ESUSPM = 1,
+        .USBSUSPM = 1,
+        .SOFM = 1,
+        //.RXFLVLM = 1, //if dma disabled only?
         //.IEPINT = 1,
         //.OEPINT = 1,
         //.IISOIXFRM = 1,
@@ -81,7 +81,7 @@ pub fn registerClass() void {
 }
 
 pub fn start() void {
-    //enable PCD global interrupts
+    //enable otg interrupts
     regs.OTG_FS_GLOBAL.OTG_FS_GAHBCFG.modify(.{ .GINT = 1 });
     //Start connect device
     deviceConnect();
@@ -289,6 +289,18 @@ const EP = struct {
     xfer_len: u32, //length of current dma transfer
     xfer_size: u32, //requested dma transfer size
     xfer_count: u32, //partial transfer length in case of multi packet transfer
+};
+
+const setup8B = packed struct {
+    var bmRequestType = packed struct {
+        Recipient: u5,
+        Type: u2,
+        DataPhase: u1,
+    };
+    bRequest: u8,
+    wValue: u16,
+    wIndex: u16,
+    wLength: u16,
 };
 
 var ep_ctrl_in = EP{

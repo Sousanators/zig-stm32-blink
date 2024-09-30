@@ -152,22 +152,92 @@ export fn tim2Handler() callconv(.C) void {
 }
 
 export fn otg_fsHanlder() callconv(.C) void {
-    //upon enabling with no usb connected, we have:
-    //NPTXFE
-    //**ESUSP
-    //**USBSUSP
-    //EOPF
-    //PTXFE
+    //from system reset with no USB connected:  0x0400 0020
+    //+NPTXFE -> not enabled or used
+    //+PTXFE -> not enabled or used
 
-    //after connecting, we have:
-    //SOF       -> new
-    //RXFLVL    -> new
-    //NPTXFE
-    //ESUSP
-    //USBSUSP
-    //ENUMDNE
-    //EOPF
-    //RSTDET
-    //PTXFE
-    while (true) {}
+    //get to main and do nothing for a bit
+
+    //upon connecting, first interrupt we get: 0x0480 1020
+    //+USBRST -> device specific reset detecetd, expected first event.
+    //+RSTDET -> anothe reset detect, specific for partial power down?
+
+    //First time we see ENUMDNE: 0x0400 2020
+    //+ENUMDNE, of course
+
+    //SoF next? If break on it, We get: 0x0400 0028
+    //+SOF -> expected next intr. RXFLVL next?
+
+    //Do we get a SET_ADDRESS request first?
+    //that would be:
+    //bmRequestType=0b0000000
+    //bRequest=0x05
+    //wValue = 0x---- (Device Address)
+    //wIndex = 0x0000
+    //wLength = 0x0000
+    //Data = Null
+
+    const gintState = regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.read();
+    const daintState = regs.OTG_FS_DEVICE.OTG_FS_DAINT.read();
+    if (gintState.USBRST == 1) {
+        //reset detected, will enumerate speed next
+        //clear flag before leaving
+        //set SNAK of all out endpoints
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL0.modify(.{ .SNAK = 1 });
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL1.modify(.{ .SNAK = 1 });
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL2.modify(.{ .SNAK = 1 });
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL3.modify(.{ .SNAK = 1 });
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL4.modify(.{ .SNAK = 1 });
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL5.modify(.{ .SNAK = 1 });
+        //unmask enumeration related interrupt masks
+        regs.OTG_FS_DEVICE.OTG_FS_DAINTMSK.modify(.{
+            .IEPM = 0x0001, //enable ep0IN interrupts
+            .OEPINT = 0x0001, //enable ep0OUT interrupts
+        });
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPMSK.modify(.{
+            .STUPM = 1, //setup phase done
+            .XFRCM = 1, //OUT xfer complete
+        });
+        regs.OTG_FS_DEVICE.OTG_FS_DIEPMSK.modify(.{
+            .XFRCM = 1, //IN xfer complete
+            .TOM = 1, //timeout
+        });
+        //setup data FIFO RAM for each FIFO
+        //FIFO sizes done in usbInit
+        //prepare ep0OUT for setup packets
+        regs.OTG_FS_DEVICE.OTG_FS_DOEPTSIZ0.modify(.{ .STUPCNT = 0b11 });
+        regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.modify(.{ .USBRST = 1 });
+    }
+    if (gintState.ENUMDNE == 1) {
+        //speed enumeration complete, prepare for setup
+        const speed = regs.OTG_FS_DEVICE.OTG_FS_DSTS.read();
+        if (speed.ENUMSPD == 0b11) { //valid full-speed value
+            //set the max packet size of ep0 (control) to 64B (0b00)
+            regs.OTG_FS_DEVICE.OTG_FS_DIEPCTL0.modify(.{ .MPSIZ = 0b00 });
+            regs.OTG_FS_DEVICE.OTG_FS_DOEPCTL0.modify(.{ .MPSIZ = 0b00 });
+        }
+        regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.modify(.{ .ENUMDNE = 1 });
+        //while (true) {}
+    }
+    if (gintState.RXFLVL == 1) {
+        regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.modify(.{ .RXFLVL = 1 });
+    }
+
+    if (gintState.SRQINT == 1) {
+        //write 1 to clear the flag
+        regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.modify(.{ .SRQINT = 1 });
+    }
+    if (gintState.ESUSP == 1) {
+        regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.modify(.{ .ESUSP = 1 });
+    }
+    if (gintState.USBSUSP == 1) {
+        regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.modify(.{ .USBSUSP = 1 });
+    }
+    if (gintState.SOF == 1) {
+        regs.OTG_FS_GLOBAL.OTG_FS_GINTSTS.modify(.{ .SOF = 1 });
+    }
+
+    if (daintState.OEPINT & 0x0001 == 0x0001) {
+        //ep0OUT interrupt event
+    }
 }
